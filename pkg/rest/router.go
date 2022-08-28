@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"palindromee/pkg/userservice"
 
 	"github.com/gorilla/mux"
@@ -213,11 +212,6 @@ func Handle(us userservice.Service) *mux.Router {
 	apiRouter.HandleFunc("/user/{id}", UserDeleteHandler(us)).Methods(http.MethodDelete)
 
 	apiRouter.HandleFunc("/user/{id}/ispalindrome", IsPalindromeHandler(us)).Methods(http.MethodGet)
-
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "hello there!")
-		fmt.Fprint(os.Stdout, "hello there!\n")
-	})
 
 	return router
 }
