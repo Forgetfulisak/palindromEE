@@ -11,7 +11,10 @@ import (
 
 func main() {
 
-	repo := storage.New()
+	repo, err := storage.New()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	userService := userservice.New(repo)
 	router := rest.Handle(userService)

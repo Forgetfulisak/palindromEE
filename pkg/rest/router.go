@@ -83,7 +83,6 @@ func UserGetHandler(us userservice.Service) http.HandlerFunc {
 		Must(id != "",
 			"UserGetHandler must be provided with an id in the route")
 
-		// TODO: handle missing id
 		user, err := us.GetUser(id)
 		if err != nil {
 			// Check the type of error
@@ -106,7 +105,13 @@ func UserPostHandler(us userservice.Service) http.HandlerFunc {
 
 		firstName := params["firstname"]
 		lastName := params["lastname"]
-		// TODO: handle missing params
+
+		if firstName == "" || lastName == "" {
+			msg := fmt.Sprintf("Missing parameters: firstname=%v&lastname=%v", firstName, lastName)
+			http.Error(w, msg, http.StatusBadRequest)
+			return
+		}
+
 		user, err := us.CreateUser(firstName, lastName)
 		if err != nil {
 			// Check the type of error
@@ -122,11 +127,20 @@ func UserPostHandler(us userservice.Service) http.HandlerFunc {
 // Does not create user if it does not exist.
 func UserPutHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := parseRequestBody(r)
 
-		id := params["id"]
+		id := mux.Vars(r)["id"]
+		Must(id != "",
+			"UserPutHandler must be provided with an id in the route")
+
+		params, err := parseRequestBody(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 		firstName := params["firstname"]
 		lastName := params["lastname"]
+
 		// TODO: handle missing params
 		user, err := us.UpdateUser(id, firstName, lastName)
 		if err != nil {
