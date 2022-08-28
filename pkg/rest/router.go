@@ -75,7 +75,6 @@ func IsPalindromeHandler(us userservice.Service) http.HandlerFunc {
 }
 
 // Get user.
-// If no ID is provided, returns all users
 func UserGetHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
@@ -105,7 +104,6 @@ func UserPostHandler(us userservice.Service) http.HandlerFunc {
 
 		firstName := params["firstname"]
 		lastName := params["lastname"]
-
 		if firstName == "" || lastName == "" {
 			msg := fmt.Sprintf("Missing parameters: firstname=%v&lastname=%v", firstName, lastName)
 			http.Error(w, msg, http.StatusBadRequest)
@@ -140,8 +138,12 @@ func UserPutHandler(us userservice.Service) http.HandlerFunc {
 
 		firstName := params["firstname"]
 		lastName := params["lastname"]
+		if firstName == "" || lastName == "" {
+			msg := fmt.Sprintf("Missing parameters: firstname=%v&lastname=%v", firstName, lastName)
+			http.Error(w, msg, http.StatusBadRequest)
+			return
+		}
 
-		// TODO: handle missing params
 		user, err := us.UpdateUser(id, firstName, lastName)
 		if err != nil {
 			// Check the type of error
@@ -182,6 +184,10 @@ func Handle(us userservice.Service) *mux.Router {
 			log.Println("Incomming request:", r.URL)
 			h.ServeHTTP(w, r)
 		})
+	})
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "ping")
 	})
 
 	apiRouter := router.PathPrefix("/api").Subrouter()
