@@ -9,6 +9,9 @@ ENV CGO_ENABLED=1
 ENV PORT=8080
 ENV DATABASE_PATH="./database/db"
 
+# Location of database unless it is bound to volume by docker-compose
+RUN mkdir "./database"
+
 
 # Install dependencies
 RUN go mod tidy
