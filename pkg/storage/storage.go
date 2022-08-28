@@ -74,6 +74,32 @@ func (s *Storage) GetUser(userID string) (userservice.User, error) {
 
 }
 
+func (s *Storage) GetAllUsers() ([]userservice.User, error) {
+	row, err := s.db.Query(`
+	SELECT id, firstname, lastname
+	FROM users;`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]userservice.User, 0)
+	for row.Next() {
+		var user dbUser
+		err := row.Scan(&user.id, &user.firstname, &user.lastname)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, userservice.User{
+			UserID:    user.id.String(),
+			FirstName: user.firstname,
+			LastName:  user.lastname,
+		})
+	}
+	return users, nil
+}
+
 func (s *Storage) InsertUser(newUser userservice.User) (userservice.User, error) {
 
 	user := dbUser{

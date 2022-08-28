@@ -2,6 +2,7 @@ package userservice
 
 type Repository interface {
 	GetUser(userID string) (User, error)
+	GetAllUsers() ([]User, error)
 	InsertUser(user User) (User, error)
 	UpdateUser(user User) (User, error)
 	DeleteUser(userID string) (User, error)
@@ -9,6 +10,7 @@ type Repository interface {
 
 type Service interface {
 	GetUser(userID string) (User, error)
+	GetAllUsers() ([]User, error)
 	CreateUser(firstName, lastName string) (User, error)
 	UpdateUser(userID, firstName, lastName string) (User, error)
 	DeleteUser(userID string) (User, error)
@@ -39,6 +41,10 @@ func New(repo Repository) Service {
 
 func (s *service) GetUser(userID string) (User, error) {
 	return s.repo.GetUser(userID)
+}
+
+func (s *service) GetAllUsers() ([]User, error) {
+	return s.repo.GetAllUsers()
 }
 
 func (s *service) CreateUser(firstName, lastName string) (User, error) {

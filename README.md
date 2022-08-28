@@ -27,7 +27,8 @@ docker-compose up
 # Create new user
 curl -X POST 'localhost:8080/api/user' --data 'firstname=abba&lastname=not-palindrome'
 
-# Read user
+# Read users
+curl -X GET 'localhost:8080/api/user/all'
 curl -X GET 'localhost:8080/api/user/<userid>'
 
 # Update user

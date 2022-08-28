@@ -93,6 +93,21 @@ func UserGetHandler(us userservice.Service) http.HandlerFunc {
 	}
 }
 
+// Get user.
+func UserGetAllHandler(us userservice.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		users, err := us.GetAllUsers()
+		if err != nil {
+			// Check the type of error
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		respond(w, users)
+	}
+}
+
 // Create user.
 func UserPostHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -191,6 +206,7 @@ func Handle(us userservice.Service) *mux.Router {
 	})
 
 	apiRouter := router.PathPrefix("/api").Subrouter()
+	apiRouter.HandleFunc("/user/all", UserGetAllHandler(us)).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/user/{id}", UserGetHandler(us)).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/user", UserPostHandler(us)).Methods(http.MethodPost)
 	apiRouter.HandleFunc("/user/{id}", UserPutHandler(us)).Methods(http.MethodPut)
