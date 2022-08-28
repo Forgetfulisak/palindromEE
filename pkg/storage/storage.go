@@ -9,7 +9,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DATABASE_PATH = "./db"
 const DATABASE_DRIVER = "sqlite3"
 
 type Storage struct {
@@ -34,8 +33,8 @@ func (s *Storage) initUserTable() error {
 	return err
 }
 
-func New() (*Storage, error) {
-	db, err := sql.Open(DATABASE_DRIVER, DATABASE_PATH)
+func New(dbPath string) (*Storage, error) {
+	db, err := sql.Open(DATABASE_DRIVER, dbPath)
 	if err != nil {
 		return nil, err
 	}

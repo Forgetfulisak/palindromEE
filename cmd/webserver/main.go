@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"palindromee/pkg/rest"
 	"palindromee/pkg/storage"
 	"palindromee/pkg/userservice"
@@ -11,7 +12,17 @@ import (
 
 func main() {
 
-	repo, err := storage.New()
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	dbPath := os.Getenv("DATABASE_PATH")
+	if dbPath == "" {
+		dbPath = "./db"
+	}
+
+	repo, err := storage.New(dbPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -20,7 +31,7 @@ func main() {
 	router := rest.Handle(userService)
 
 	srv := &http.Server{
-		Addr:         "localhost:8080",
+		Addr:         ":" + port,
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
