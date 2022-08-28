@@ -5,7 +5,7 @@ func isPalindrome(s string) bool {
 
 	for start, letter := range letters {
 		end := len(letters) - start - 1
-		if start > end {
+		if start >= end {
 			return true
 		}
 		if letter != letters[end] {

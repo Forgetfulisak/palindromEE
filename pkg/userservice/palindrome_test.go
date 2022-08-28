@@ -11,6 +11,7 @@ func FuzzIsPalindrome(f *testing.F) {
 	f.Add("paap", true)
 	f.Add("hoh", true)
 	f.Add("hohoh", true)
+	f.Add("a", true)
 	f.Fuzz(func(t *testing.T, in string, expected bool) {
 		out := isPalindrome(in)
 		if out != expected {
