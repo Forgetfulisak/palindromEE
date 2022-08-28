@@ -11,16 +11,39 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func parseBody(r *http.Request) (map[string]string, error) {
-
-	urlParams := mux.Vars(r)
-	if len(urlParams) != 0 {
-		return urlParams, nil
+func Must(cond bool, msg string) {
+	if !cond {
+		panic(msg)
 	}
+}
 
-	bodyParams := make(map[string]string)
-	err := json.NewDecoder(r.Body).Decode(&bodyParams)
-	return bodyParams, err
+// Parse request body with format:
+// application/x-www-form-urlencoded
+// NOTE: Will only grab the first value for each key
+func parseRequestBody(r *http.Request) (map[string]string, error) {
+	Must(r.Method == http.MethodPost ||
+		r.Method == http.MethodPut ||
+		r.Method == http.MethodPatch,
+		"Request must be of type Post, Put or Patch",
+	)
+
+	data := make(map[string]string)
+	err := r.ParseForm()
+	for k, v := range r.PostForm {
+		if len(v) > 0 {
+			data[k] = v[0]
+		}
+	}
+	return data, err
+
+	// contentType := r.Header.Get("Content-type")
+	// switch contentType {
+	// case "":
+	// case "application/x-www-form-urlencoded":
+	// case "application/json":
+	// default:
+	// 	panic("not implemented")
+	// }
 }
 
 func respond(w http.ResponseWriter, data any) {
@@ -35,13 +58,11 @@ func respond(w http.ResponseWriter, data any) {
 
 func IsPalindromeHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := parseBody(r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+		params := mux.Vars(r)
 		id := params["id"]
-		// TODO: handle missing id
+		Must(id != "",
+			"IsPalindromeHandler must be provided with an id in the route")
+
 		result, err := us.CheckPalindrome(id)
 		if err != nil {
 			// Check the type of error
@@ -57,12 +78,11 @@ func IsPalindromeHandler(us userservice.Service) http.HandlerFunc {
 // If no ID is provided, returns all users
 func UserGetHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := parseBody(r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+		params := mux.Vars(r)
 		id := params["id"]
+		Must(id != "",
+			"UserGetHandler must be provided with an id in the route")
+
 		// TODO: handle missing id
 		user, err := us.GetUser(id)
 		if err != nil {
@@ -78,11 +98,12 @@ func UserGetHandler(us userservice.Service) http.HandlerFunc {
 // Create user.
 func UserPostHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := parseBody(r)
+		params, err := parseRequestBody(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
 		firstName := params["firstname"]
 		lastName := params["lastname"]
 		// TODO: handle missing params
@@ -101,11 +122,8 @@ func UserPostHandler(us userservice.Service) http.HandlerFunc {
 // Does not create user if it does not exist.
 func UserPutHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := parseBody(r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+		params, err := parseRequestBody(r)
+
 		id := params["id"]
 		firstName := params["firstname"]
 		lastName := params["lastname"]
@@ -125,13 +143,11 @@ func UserPutHandler(us userservice.Service) http.HandlerFunc {
 // Deletes user.
 func UserDeleteHandler(us userservice.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := parseBody(r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+		params := mux.Vars(r)
 		id := params["id"]
-		// TODO: handle missing id
+		Must(id != "",
+			"IsPalindromeHandler must be provided with an id in the route")
+
 		user, err := us.DeleteUser(id)
 		if err != nil {
 			// Check the type of error
@@ -156,7 +172,7 @@ func Handle(us userservice.Service) *mux.Router {
 
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/user/{id}", UserGetHandler(us)).Methods(http.MethodGet)
-	apiRouter.HandleFunc("/user/{id}", UserPostHandler(us)).Methods(http.MethodPost)
+	apiRouter.HandleFunc("/user", UserPostHandler(us)).Methods(http.MethodPost)
 	apiRouter.HandleFunc("/user/{id}", UserPutHandler(us)).Methods(http.MethodPut)
 	apiRouter.HandleFunc("/user/{id}", UserDeleteHandler(us)).Methods(http.MethodDelete)
 
