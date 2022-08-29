@@ -1,7 +1,7 @@
 # Palindrom EE
 
 Coding-exercise for interview with Amedia.
-This web-app allows you to create/read/update/delete users, and check if their first/last name are palindromes.
+This crud-app allows you to create/read/update/delete users, and check if their first/last name are palindromes.
 
 
 ## Build
